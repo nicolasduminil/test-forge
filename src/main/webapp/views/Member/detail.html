@@ -1,0 +1,59 @@
+<header ng-switch on="$location.path().indexOf('/Members/new') > -1">
+    <h3 ng-switch-when="true">Create a new Member</h3>
+    <h3 ng-switch-when="false">View or edit Member</h3>
+</header>
+<form id="MemberForm" name="MemberForm" class="form-horizontal" role="form">
+    
+
+    <div class="form-group" ng-class="{'has-error': MemberForm.firstName.$invalid}">
+        <label for="firstName" class="col-sm-2 control-label">First Name</label>
+        <div id="firstNameControls" class="col-sm-10">
+            <input id="firstName" name="firstName" type="text" required ng-maxlength="40" class="form-control" ng-model="member.firstName" placeholder="Enter the Member First Name"></input>
+            <span class="help-block error" ng-show="MemberForm.firstName.$error.required">required</span> 
+            <span class="help-block error" ng-show="MemberForm.firstName.$error.maxlength">maximum length is 40</span>
+        </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': MemberForm.lastName.$invalid}">
+        <label for="lastName" class="col-sm-2 control-label">Last Name</label>
+        <div id="lastNameControls" class="col-sm-10">
+            <input id="lastName" name="lastName" type="text" required ng-maxlength="40" class="form-control" ng-model="member.lastName" placeholder="Enter the Member Last Name"></input>
+            <span class="help-block error" ng-show="MemberForm.lastName.$error.required">required</span> 
+            <span class="help-block error" ng-show="MemberForm.lastName.$error.maxlength">maximum length is 40</span>
+        </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': MemberForm.address.$invalid}">
+        <label for="address" class="col-sm-2 control-label">Address</label>
+        <div id="addressControls" class="col-sm-10">
+            <input id="address" name="address" type="text" required class="form-control" ng-model="member.address" placeholder="Enter the Member Address"></input>
+            <span class="help-block error" ng-show="MemberForm.address.$error.required">required</span> 
+        </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': MemberForm.emailAddress.$invalid}">
+        <label for="emailAddress" class="col-sm-2 control-label">Email Address</label>
+        <div id="emailAddressControls" class="col-sm-10">
+            <input id="emailAddress" name="emailAddress" type="text" required class="form-control" ng-model="member.emailAddress" placeholder="Enter the Member Email Address"></input>
+            <span class="help-block error" ng-show="MemberForm.emailAddress.$error.required">required</span> 
+        </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': MemberForm.project.$invalid}">
+        <label for="project" class="col-sm-2 control-label">Project</label>
+        <div id="projectControls" class="col-sm-10">
+            <select id="project" name="project" multiple class="form-control" ng-model="projectSelection" ng-options="p.text for p in projectSelectionList">
+                <option value="">Choose a Project</option>
+            </select>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button id="saveMember" name="saveMember" class="btn btn-primary" ng-disabled="isClean() || MemberForm.$invalid" ng-click="save()"><span class="glyphicon glyphicon-ok-sign"></span> Save</button>
+            <button id="cancel" name="cancel" class="btn btn-default" ng-click="cancel()"><span class="glyphicon glyphicon-remove-sign"></span> Cancel</button>
+            <button id="deleteMember" name="deleteMember" class="btn btn-danger" ng-show="member.id" ng-click="remove()"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+        </div>
+    </div>
+</form>
