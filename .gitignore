@@ -9,6 +9,11 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+*target*
+*.jar
+*.war
+*.ear
+*.class
 
 # Eclipse Core
 .project
