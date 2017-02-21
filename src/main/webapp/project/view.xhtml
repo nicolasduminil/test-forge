@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:forgeview="http://jboss.org/forge/view"
+	template="/resources/scaffold/pageTemplate.xhtml">
+
+	<f:metadata>
+		<f:viewParam name="id" value='#{projectBean.id}'/>
+		<f:event type="preRenderView" listener='#{projectBean.retrieve}'/>
+	</f:metadata>
+
+	<ui:param name="pageTitle" value="View Project"/>
+
+	<ui:define name="header">
+		Project
+	</ui:define>
+
+	<ui:define name="subheader">
+		View existing Project
+	</ui:define>
+
+	<ui:define name="footer"/>
+
+	<ui:define name="main">
+		<h:panelGrid columnClasses="label,component,required" columns="3">
+			<h:outputLabel for="projectBeanProjectName" value="Name:"/>
+			<h:outputText id="projectBeanProjectName" value="#{projectBean.project.name}"/>
+			<h:outputText/>
+			<h:outputLabel for="projectBeanProjectDescription" value="Description:"/>
+			<h:outputText id="projectBeanProjectDescription" value="#{projectBean.project.description}"/>
+			<h:outputText/>
+			<h:outputLabel for="projectBeanProjectMembers" value="Members:"/>
+			<h:dataTable id="projectBeanProjectMembers" styleClass="data-table" value="#{forgeview:asList(projectBean.project.members)}" var="_item">
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="First Name"/>
+					</f:facet>
+					<h:link outcome="/member/view">
+						<f:param name="id" value="#{_item.id}"/>
+						<h:outputText id="_itemFirstName" value="#{_item.firstName}"/>
+					</h:link>
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Last Name"/>
+					</f:facet>
+					<h:link outcome="/member/view">
+						<f:param name="id" value="#{_item.id}"/>
+						<h:outputText id="_itemLastName" value="#{_item.lastName}"/>
+					</h:link>
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Address"/>
+					</f:facet>
+					<h:link outcome="/member/view">
+						<f:param name="id" value="#{_item.id}"/>
+						<h:outputText id="_itemAddress" value="#{_item.address}"/>
+					</h:link>
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Email Address"/>
+					</f:facet>
+					<h:link outcome="/member/view">
+						<f:param name="id" value="#{_item.id}"/>
+						<h:outputText id="_itemEmailAddress" value="#{_item.emailAddress}"/>
+					</h:link>
+				</h:column>
+			</h:dataTable>
+			<h:outputText/>
+		</h:panelGrid>
+
+		<div class="buttons">
+			<h:link value="View All" outcome="search" styleClass="btn btn-primary"/> 
+			<h:link value="Edit" outcome="create" includeViewParams="true" styleClass="btn btn-primary"/>
+			<h:link value="Create New" outcome="create" styleClass="btn btn-primary"/>
+		</div>
+	</ui:define>
+
+</ui:composition>
