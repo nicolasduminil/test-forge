@@ -1,118 +1,108 @@
 package fr.simplex_software.forge.test.rest;
 
-import java.util.List;
+import java.util.*;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriBuilder;
-import fr.simplex_software.forge.test.model.Project;
+import javax.ejb.*;
+import javax.persistence.*;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.*;
+
+import fr.simplex_software.forge.test.model.*;
 
 /**
  * 
  */
 @Stateless
 @Path("/projects")
-public class ProjectEndpoint {
-	@PersistenceContext(unitName = "test-pe")
-	private EntityManager em;
+public class ProjectEndpoint
+{
+  @PersistenceContext(unitName = "test-pe")
+  private EntityManager em;
 
-	@POST
-	@Consumes("application/json")
-	public Response create(Project entity) {
-		em.persist(entity);
-		return Response.created(
-				UriBuilder.fromResource(ProjectEndpoint.class)
-						.path(String.valueOf(entity.getId())).build()).build();
-	}
+  @POST
+  @Consumes("application/json")
+  public Response create(Project entity)
+  {
+    /*for (Member member : entity.getMembers())
+    {
+      Member m = em.find(Member.class, member.getId());
+      entity.getMembers().add(m);
+      m.getProjects().add(entity);
+    }*/
+    em.persist(entity);
+    return Response.created(UriBuilder.fromResource(ProjectEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
+  }
 
-	@DELETE
-	@Path("/{id:[0-9][0-9]*}")
-	public Response deleteById(@PathParam("id") Long id) {
-		Project entity = em.find(Project.class, id);
-		if (entity == null) {
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		em.remove(entity);
-		return Response.noContent().build();
-	}
+  @DELETE
+  @Path("/{id:[0-9][0-9]*}")
+  public Response deleteById(@PathParam("id") Long id)
+  {
+    Response resp = Response.noContent().build();
+    Project entity = em.find(Project.class, id);
+    if (entity == null)
+      resp = Response.status(Status.NOT_FOUND).build();
+    em.remove(entity);
+    return resp;
+  }
 
-	@GET
-	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
-	public Response findById(@PathParam("id") Long id) {
-		TypedQuery<Project> findByIdQuery = em
-				.createQuery(
-						"SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.members WHERE p.id = :entityId ORDER BY p.id",
-						Project.class);
-		findByIdQuery.setParameter("entityId", id);
-		Project entity;
-		try {
-			entity = findByIdQuery.getSingleResult();
-		} catch (NoResultException nre) {
-			entity = null;
-		}
-		if (entity == null) {
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		return Response.ok(entity).build();
-	}
+  @GET
+  @Path("/{id:[0-9][0-9]*}")
+  @Produces("application/json")
+  public Response findById(@PathParam("id") Long id)
+  {
+    Response resp = null;
+    TypedQuery<Project> findByIdQuery = em.createQuery("SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.members WHERE p.id = :entityId ORDER BY p.id", Project.class);
+    findByIdQuery.setParameter("entityId", id);
+    Project entity = null;
+    try
+    {
+      entity = findByIdQuery.getSingleResult();
+      resp = Response.ok(entity).build();
+    }
+    catch (NoResultException nre)
+    {
+      resp = Response.status(Status.NOT_FOUND).build();
+    }
+    return resp;
+  }
 
-	@GET
-	@Produces("application/json")
-	public List<Project> listAll(@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
-		TypedQuery<Project> findAllQuery = em
-				.createQuery(
-						"SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.members ORDER BY p.id",
-						Project.class);
-		if (startPosition != null) {
-			findAllQuery.setFirstResult(startPosition);
-		}
-		if (maxResult != null) {
-			findAllQuery.setMaxResults(maxResult);
-		}
-		final List<Project> results = findAllQuery.getResultList();
-		return results;
-	}
+  @GET
+  @Produces("application/json")
+  public List<Project> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult)
+  {
+    TypedQuery<Project> findAllQuery = em.createQuery("SELECT DISTINCT p FROM Project p LEFT JOIN FETCH p.members ORDER BY p.id", Project.class);
+    if (startPosition != null)
+      findAllQuery.setFirstResult(startPosition);
+    if (maxResult != null)
+      findAllQuery.setMaxResults(maxResult);
+    return findAllQuery.getResultList();
+  }
 
-	@PUT
-	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
-	public Response update(@PathParam("id") Long id, Project entity) {
-		if (entity == null) {
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-		if (id == null) {
-			return Response.status(Status.BAD_REQUEST).build();
-		}
-		if (!id.equals(entity.getId())) {
-			return Response.status(Status.CONFLICT).entity(entity).build();
-		}
-		if (em.find(Project.class, id) == null) {
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		try {
-			entity = em.merge(entity);
-		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
-		}
-
-		return Response.noContent().build();
-	}
+  @PUT
+  @Path("/{id:[0-9][0-9]*}")
+  @Consumes("application/json")
+  public Response update(@PathParam("id") Long id, Project entity)
+  {
+    Response resp = null;
+    
+    if (entity == null)
+      resp = Response.status(Status.BAD_REQUEST).build();
+    if (id == null)
+      resp = Response.status(Status.BAD_REQUEST).build();
+    if (!id.equals(entity.getId()))
+      resp = Response.status(Status.CONFLICT).entity(entity).build();
+    if (em.find(Project.class, id) == null)
+      resp = Response.status(Status.NOT_FOUND).build();
+    try
+    {
+      entity = em.merge(entity);
+      resp = Response.noContent().build();
+    }
+    catch (OptimisticLockException e)
+    {
+      resp = Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
+    }
+    return resp;
+  }
 }
